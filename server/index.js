@@ -12,21 +12,18 @@ dotenv.config()
 dns.setDefaultResultOrder('ipv4first')
 
 const app = express()
-app.use(cors({ origin: ['http://localhost:5173','http://localhost:5174'], credentials: true }))
+app.use(cors({ origin: ['http://localhost:5173','http://localhost:5174', 'https://habitly-rho.vercel.app'], credentials: true }))
 app.use(express.json())
 app.use('/api/auth',   authRoutes)
 app.use('/api/habits', habitRoutes)
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }))
 
 // ── Midnight cron job ──
-// Runs every day at 00:01 to finalize previous day's logs.
-// This ensures missed habits are locked in as completed=false
-// so streak calculations are always accurate.
 function scheduleMidnightJob() {
   const now = new Date()
   const midnight = new Date(now)
   midnight.setDate(midnight.getDate() + 1)
-  midnight.setHours(0, 1, 0, 0) // 00:01 AM next day
+  midnight.setHours(0, 1, 0, 0)
   const msUntilMidnight = midnight - now
 
   setTimeout(async () => {
@@ -36,7 +33,6 @@ function scheduleMidnightJob() {
     } catch (err) {
       console.error('Midnight job error:', err.message)
     }
-    // Schedule again for the next day
     scheduleMidnightJob()
   }, msUntilMidnight)
 
